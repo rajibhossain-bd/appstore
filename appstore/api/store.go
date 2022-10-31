@@ -240,8 +240,8 @@ func (a *StoreClient) parseSignedTransaction(transaction string) (*JWSTransactio
 	return tran, nil
 }
 
-func (a *StoreClient) ParseSignedPayload(transaction string) (map[string]string, error) {
-	payload := make(map[string]string)
+func (a *StoreClient) ParseSignedPayload(transaction string) (map[string]interface{}, error) {
+	payload := make(map[string]interface{})
 	claims := jwt.MapClaims{}
 	rootCertStr, err := a.cert.extractCertByIndex(transaction, 2)
 	if err != nil {
@@ -261,8 +261,12 @@ func (a *StoreClient) ParseSignedPayload(transaction string) (map[string]string,
 	if err != nil {
 		return nil, err
 	} else {
+		payload["notificationType"] = claims["notificationType"]
+		payload["subType"] = claims["subtype"]
+		payload["notificationUUID"] = claims["notificationUUID"]
+
 		for k, v := range claims["data"].(map[string]interface{}) {
-			payload[k] = v.(string)
+			payload[k] = v
 		}
 	}
 	return payload, nil
